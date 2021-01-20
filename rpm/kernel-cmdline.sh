@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SCRIPT_VERSION=1.0.0
+SCRIPT_VERSION=1.1.0
 PRINT_RED='\033[0;31m'
 PRINT_GREEN='\033[0;32m'
 PRINT_NC='\033[0m'
@@ -35,11 +35,62 @@ only_print=0
 force_yes=0
 quiet_mode=0
 
-declare -a modify_vars
-declare -a modify_vals
-declare -a modify_vars_full
-declare -a remove_vars
-declare -a var_set
+# Emulate bash arrays.
+# Caveat: strings with spaces are, from hard to impossible, to handle
+
+array_declare() {
+    eval _array_$1_n=0
+}
+
+array_size() {
+    local _array_name=$1
+    local _array_size
+    eval _array_size="\$_array_${_array_name}_n"
+    echo -n $_array_size
+}
+
+array_val() {
+    local _array_name=$1
+    local _array_n=$2
+    # Do it like bash, echo empty for nonexistent values
+    eval v="\$_array_${_array_name}_$_array_n"
+    echo -n "$v"
+}
+
+array_set() {
+    local _array_name=$1
+    local _array_n=$2
+    local _array_val="$3"
+    local _array_size=$(array_size $_array_name)
+
+    eval _array_${_array_name}_$_array_n="\"$_array_val\""
+    if [ $_array_n -gt $((_array_size-1)) ]; then
+        eval _array_${_array_name}_n=$((_array_n+1))
+    fi
+}
+
+array_append() {
+    local _array_name=$1
+    local _array_val="$2"
+    local _array_size=$(array_size $_array_name)
+    array_set $_array_name $_array_size "$_array_val"
+}
+
+array_vals() {
+    local _array_name=$1
+    local _array_size=$(array_size $_array_name)
+    _array_size=$((_array_size-1))
+    for i in $(seq -s " " 0 $_array_size); do
+        array_val $_array_name $i
+        echo ""
+    done
+}
+
+array_declare modify_vars
+array_declare modify_vals
+array_declare modify_vars_full
+array_declare remove_vars
+array_declare var_set
 
 boot_device_a=
 boot_device_b=
@@ -259,13 +310,13 @@ write_to_emmc() {
 }
 
 add_modify_var() {
-    modify_vars+=("$(echo $1 | cut -d'=' -f1)")
-    var_set+=("0")
-    modify_vars_full+=("$1")
+    array_append modify_vars "$(echo $1 | cut -d'=' -f1)"
+    array_append var_set "0"
+    array_append modify_vars_full "$1"
     if [ -n "$(echo $1 | grep -e '=')" ]; then
-        modify_vals+=("$(echo $1 | cut -d'=' -f2-)")
+        array_append modify_vals "$(echo $1 | cut -d'=' -f2-)"
     else
-        modify_vals+=("")
+        array_append modify_vals ""
     fi
 }
 
@@ -363,7 +414,7 @@ while [ $# -gt 0 ]; do
             ;;
         -r|--remove)
             shift
-            remove_vars+=("$1")
+            array_append remove_vars "$1"
             ;;
         --selinux)
             shift
@@ -379,7 +430,7 @@ done
 ##########################################################################
 # Check for root access and for needed dependencies
 
-if [ $UID -ne 0 ]; then
+if [ $(whoami) != "root" ]; then
     echo "This script needs root access."
     exit 1
 fi
@@ -461,20 +512,20 @@ else
         modified=0
 
         i=0
-        for mod in "${modify_vars[@]}"; do
+        for mod in $(array_vals modify_vars); do
             if [ "$var" == "$mod" ]; then
-                modify_var_val="${modify_vals[$i]}"
+                modify_var_val="$(array_val modify_vals $i)"
                 if [ "$modify_var_val" != "$val" ]; then
-                    new_cmdline="$new_cmdline$space${modify_vars_full[$i]}"
-                    log_green "$space${modify_vars_full[$i]}"
+                    new_cmdline="$new_cmdline$space$(array_val modify_vars_full $i)"
+                    log_green "$space$(array_val modify_vars_full $i)"
                     modified=1
                 fi
-                var_set[$i]="1"
+                array_set var_set $i "1"
             fi
-            ((i++))
+            i=$((i+1))
         done
 
-        for rem in "${remove_vars[@]}"; do
+        for rem in $(array_vals remove_vars); do
             if [ "$var" == "$rem" ]; then
                 modified=1
                 break
@@ -492,15 +543,15 @@ else
     done
 
     i=0
-    for vset in "${var_set[@]}"; do
+    for vset in $(array_vals var_set); do
         if [ "$vset" == "1" ]; then
-            ((i++))
+            i=$((i+1))
             continue
         fi
-        new_cmdline="$new_cmdline$space${modify_vars_full[$i]}"
-        log_green "$space${modify_vars_full[$i]}"
+        new_cmdline="$new_cmdline$space$(array_val modify_vars_full $i)"
+        log_green "$space$(array_val modify_vars_full $i)"
         space=" "
-        ((i++))
+        i=$((i+1))
     done
 
     log_normal ""

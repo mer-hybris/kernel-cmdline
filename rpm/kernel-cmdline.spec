@@ -11,10 +11,10 @@ Source1:    kernel-cmdline.sh
 Modify kernel command line with ease.
 
 %prep
-%setup -q -n %{name}-%{version}/mkbootimg
+%autosetup -p1 -n %{name}-%{version}/mkbootimg
 
 %build
-make %{?jobs:-j%jobs}
+%make_build
 
 %install
 rm -rf %{buildroot}
@@ -24,6 +24,7 @@ install -D -m 755 %{SOURCE1} %{buildroot}%{_bindir}/kernel-cmdline
 
 %files
 %defattr(-,root,root,-)
+%license NOTICE
 %dir %{_libexecdir}/kernel-cmdline
 %{_libexecdir}/%{name}/mkbootimg
 %{_libexecdir}/%{name}/unpackbootimg

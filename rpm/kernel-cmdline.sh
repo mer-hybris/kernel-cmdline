@@ -263,7 +263,11 @@ pack_image() {
     local cmdline="$@"
     log_debug "Pack image to $out..."
 
-    options="--kernel $base-zImage"
+    local kernel_file="${base}-kernel"
+    if [ -f "${base}-zImage" ]; then
+        kernel_file="${base}-zImage"
+    fi
+    options="--kernel $kernel_file"
     #                             | filename      | argument if not same as filename
     extend_options          $base   base
     extend_options          $base   board

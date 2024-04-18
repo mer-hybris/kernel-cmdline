@@ -1,6 +1,6 @@
 Name:       kernel-cmdline
 Summary:    Modify kernel cmdline
-Version:    1.1.2
+Version:    1.1.3
 Release:    1
 License:    ASL 2.0
 URL:        https://github.com/mer-hybris/kernel-cmdline

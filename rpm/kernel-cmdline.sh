@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SCRIPT_VERSION=1.1.0
+SCRIPT_VERSION=1.1.3
 PRINT_RED='\033[0;31m'
 PRINT_GREEN='\033[0;32m'
 PRINT_NC='\033[0m'

@@ -1,3 +1,0 @@
-[submodule "mkbootimg"]
-	path = mkbootimg
-	url = https://github.com/sailfishos-mirror/mkbootimg.git

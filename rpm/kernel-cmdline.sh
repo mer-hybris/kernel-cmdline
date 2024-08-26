@@ -19,8 +19,8 @@ PRINT_RED='\033[0;31m'
 PRINT_GREEN='\033[0;32m'
 PRINT_NC='\033[0m'
 
-packbootimg_bin="/usr/libexec/kernel-cmdline/mkbootimg"
-unpackbootimg_bin="/usr/libexec/kernel-cmdline/unpackbootimg"
+packbootimg_bin="/usr/bin/mkbootimg"
+unpackbootimg_bin="/usr/bin/unpack_bootimg"
 
 selinux_config_file="/etc/selinux/config"
 device_info_file="/var/lib/flash-partition/device-info"

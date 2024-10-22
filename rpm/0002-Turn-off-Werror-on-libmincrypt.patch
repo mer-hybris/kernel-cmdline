@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pekka Vuorela <pekka.vuorela@jolla.com>
+Date: Tue, 22 Oct 2024 12:47:43 +0300
+Subject: [PATCH] Turn off -Werror on libmincrypt
+
+Let's avoid build failures caused by external changes.
+Now latest GCCs are warning on RSA_verify() but that's not even used
+here.
+---
+ libmincrypt/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libmincrypt/Makefile b/libmincrypt/Makefile
+index 3ef33026..dc26a087 100755
+--- a/libmincrypt/Makefile
++++ b/libmincrypt/Makefile
+@@ -27,7 +27,7 @@ $(LIB):$(LIB_OBJS)
+ 	$(CP) $@ ..
+ 
+ %.o:%.c
+-	$(CROSS_COMPILE)$(CC) -o $@ $(CFLAGS) -c $< $(INC) -Werror
++	$(CROSS_COMPILE)$(CC) -o $@ $(CFLAGS) -c $< $(INC)
+ 
+ clean:
+ 	$(RM) $(LIB_OBJS) $(LIB)

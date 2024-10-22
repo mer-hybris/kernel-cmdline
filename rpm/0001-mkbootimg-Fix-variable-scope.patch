@@ -8,7 +8,7 @@ Subject: [PATCH] mkbootimg: Fix variable scope
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/mkbootimg.c b/mkbootimg.c
-index f72a2650fbbfd975217ab62ef9775e42a65807e3..a19c083bb2bff8bb3b3bff9abd3a9fed8d0f21dc 100644
+index f72a2650..a19c083b 100644
 --- a/mkbootimg.c
 +++ b/mkbootimg.c
 @@ -28,6 +28,7 @@
